@@ -1,0 +1,17 @@
+# Ignore the virtual environment
+venv/
+env/
+
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore secret API keys
+.env
+
+# Ignore Node dependencies
+node_modules/
+
+# Ignore system files
+.DS_Store
+Thumbs.db
