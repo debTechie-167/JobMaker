@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>AlignMetric AI - Intelligent Resume Matching</title>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#a855f7",
+            "primary-container": "#7e22ce",
+            "primary-fixed": "#d8b4fe",
+            "on-primary": "#ffffff",
+            surface: "#0e0e0e",
+            "surface-container": "#1a1a1a",
+            "surface-container-low": "#121212",
+            "surface-container-lowest": "#050505",
+            "surface-container-high": "#222222",
+            "surface-container-highest": "#2e2e2e",
+            "on-surface": "#f3f4f6",
+            "on-surface-variant": "#9ca3af",
+            "outline-variant": "#374151",
+            error: "#f87171",
+            "error-container": "#991b1b",
+            tertiary: "#f472b6"
+          },
+          borderRadius: {
+            DEFAULT: "0.125rem",
+            lg: "0.25rem",
+            xl: "0.5rem",
+            full: "0.75rem"
+          },
+          fontFamily: {
+            headline: ["Manrope"],
+            body: ["Inter"],
+            label: ["Inter"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: "Inter", sans-serif; background-color: #0e0e0e; color: #f3f4f6; }
+    .font-headline { font-family: "Manrope", sans-serif; }
+    .glass-panel { background: rgba(26, 26, 26, 0.6); backdrop-filter: blur(24px); }
+    .shimmer-btn {
+      background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 0 15px rgba(168, 85, 247, 0.4);
+    }
+    .shimmer-btn::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(to right, transparent, rgba(255,255,255,0.2), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+    .shimmer-btn:disabled {
+      opacity: 0.7;
+      cursor: wait;
+    }
+    .shimmer-btn:disabled::after {
+      animation-duration: 1.2s;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+    .radial-progress {
+      --value: 0;
+      --size: 12rem;
+      --thickness: 1rem;
+      display: grid;
+      place-content: center;
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
+      background: radial-gradient(closest-side, #0e0e0e 80%, transparent 0 100%), conic-gradient(#a855f7 calc(var(--value) * 1%), #2e2e2e 0);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.15);
+      transition: background 500ms ease;
+    }
+    .drop-active {
+      border-color: rgba(168, 85, 247, 0.95);
+      box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.5), 0 0 35px rgba(168, 85, 247, 0.12);
+      background: rgba(126, 34, 206, 0.08);
+    }
+  </style>
+</head>
+<body class="selection:bg-primary/30">
+  <nav class="fixed top-0 w-full z-50 bg-[#0e0e0e]/60 backdrop-blur-xl border-b border-purple-500/15 shadow-[0_0_20px_rgba(168,85,247,0.1)]">
+    <div class="flex justify-between items-center px-6 h-16 max-w-7xl mx-auto">
+      <div class="text-2xl font-black text-purple-400 tracking-tighter font-headline">AlignMetric AI</div>
+      <div class="hidden md:flex gap-8 items-center">
+        <a class="text-purple-400 border-b-2 border-purple-500 pb-1 font-headline text-sm tracking-tight" href="#results">How it works</a>
+        <a class="text-gray-400 hover:text-purple-300 font-headline text-sm tracking-tight transition-colors duration-200" href="https://github.com/" target="_blank" rel="noreferrer">GitHub</a>
+        <button class="bg-purple-500 text-white px-5 py-2 rounded-full text-sm font-semibold hover:opacity-90 active:scale-95 transition-all shadow-[0_0_10px_rgba(168,85,247,0.3)]" id="jumpToAnalyzer">Get Started</button>
+      </div>
+      <div class="md:hidden">
+        <span class="material-symbols-outlined text-purple-400">menu</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="pt-32 pb-20 px-6 max-w-7xl mx-auto lg:pl-72">
+    <header class="text-center mb-16">
+      <h1 class="text-5xl md:text-7xl font-headline font-extrabold tracking-tight mb-6 bg-gradient-to-r from-primary via-primary-fixed to-primary-container bg-clip-text text-transparent">
+        Bridge the Gap to Your <br class="hidden md:block" /> Dream Job
+      </h1>
+      <p class="text-on-surface-variant text-lg max-w-2xl mx-auto font-body leading-relaxed">
+        Harness the power of AI to align your professional profile with high-impact job opportunities in seconds.
+      </p>
+    </header>
+
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12" id="analyzer">
+      <div class="group flex flex-col items-center justify-center border-2 border-dashed border-primary/30 bg-surface-container-low rounded-xl p-12 hover:bg-surface-container hover:border-primary/60 transition-all cursor-pointer relative overflow-hidden" id="uploadZone">
+        <input type="file" id="resumeInput" class="hidden" accept=".pdf,.docx,.txt" />
+        <div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+        <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <span class="material-symbols-outlined text-primary text-4xl">cloud_upload</span>
+        </div>
+        <h3 class="text-xl font-headline font-semibold mb-2">Upload Resume</h3>
+        <p class="text-on-surface-variant text-center text-sm font-label uppercase tracking-widest">PDF, DOCX, TXT up to 10MB</p>
+        <p class="mt-4 text-sm text-primary font-semibold text-center" id="selectedFileLabel">No file selected</p>
+      </div>
+
+      <div class="bg-surface-container-low rounded-xl p-8 flex flex-col gap-4 border border-outline-variant/10">
+        <div class="flex items-center justify-between mb-2">
+          <h3 class="text-xl font-headline font-semibold">Job Description</h3>
+          <span class="text-xs font-label uppercase tracking-widest text-primary/60">Paste text below</span>
+        </div>
+        <textarea id="jobDescription" class="flex-grow bg-surface-container-lowest border border-outline-variant/20 rounded-lg p-4 text-on-surface-variant focus:ring-1 focus:ring-primary/40 focus:border-primary/40 placeholder:text-outline-variant/50 min-h-[240px] font-body text-sm leading-relaxed outline-none" placeholder="Describe the role requirements, technical stacks, and expectations..."></textarea>
+      </div>
+    </section>
+
+    <div class="flex flex-col items-center gap-4 mb-10">
+      <button id="analyzeButton" class="shimmer-btn w-full max-w-md py-5 rounded-full text-white font-headline font-bold text-lg tracking-wide shadow-xl active:scale-95 transition-transform flex items-center justify-center gap-3">
+        <span class="material-symbols-outlined">auto_awesome</span>
+        <span id="analyzeButtonLabel">Analyze Alignment</span>
+      </button>
+      <div class="w-full max-w-sm h-1.5 bg-surface-container-highest rounded-full overflow-hidden hidden" id="progressTrack">
+        <div class="h-full bg-primary w-[15%] transition-all duration-1000 shadow-[0_0_10px_#a855f7]" id="progressBar"></div>
+      </div>
+      <p class="text-xs font-label text-primary/70 uppercase tracking-[0.2em] hidden" id="processingText">Processing technical nodes...</p>
+      <p class="text-sm text-error hidden" id="errorMessage"></p>
+      <p class="text-sm text-primary/80 hidden" id="statusMessage"></p>
+    </div>
+
+    <section class="mb-24 hidden" id="emptyState">
+      <div class="bg-surface-container-low rounded-xl p-10 border border-outline-variant/10 text-center">
+        <h3 class="font-headline text-2xl font-bold mb-3">Ready for your first analysis</h3>
+        <p class="text-on-surface-variant max-w-2xl mx-auto">Upload a resume, paste a job description, and the dashboard will generate a match score, missing skills, and resume improvement suggestions.</p>
+      </div>
+    </section>
+
+    <section class="hidden" id="results">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-4 bg-surface-container rounded-xl p-10 flex flex-col items-center justify-center text-center border border-primary/10 shadow-[0_0_40px_rgba(168,85,247,0.05)]">
+          <h4 class="text-on-surface-variant font-label uppercase tracking-widest text-xs mb-8">Match Precision</h4>
+          <div class="radial-progress relative mb-6" id="scoreGauge" style="--value: 0; --size: 14rem; --thickness: 0.75rem;">
+            <div class="flex flex-col items-center justify-center">
+              <span class="text-6xl font-headline font-extrabold text-on-surface" id="scoreValue">0%</span>
+              <span class="text-primary font-label text-xs uppercase font-bold tracking-tighter" id="scoreTitle">Awaiting Analysis</span>
+            </div>
+          </div>
+          <p class="text-sm text-on-surface-variant leading-relaxed" id="summaryText">Run the analyzer to see how your resume lines up with the target role.</p>
+          <div class="mt-5 hidden px-3 py-2 bg-primary/10 border border-primary/20 text-primary text-[10px] uppercase tracking-widest font-black rounded" id="fallbackBadge">Keyword fallback mode</div>
+        </div>
+
+        <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div class="bg-surface-container rounded-xl p-8 border border-outline-variant/10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-error">warning</span>
+              <h4 class="font-headline font-bold">Missing Keywords</h4>
+            </div>
+            <div class="flex flex-wrap gap-2" id="missingSkillsList"></div>
+          </div>
+
+          <div class="bg-surface-container rounded-xl p-8 border border-outline-variant/10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-tertiary">tips_and_updates</span>
+              <h4 class="font-headline font-bold">Quick Wins</h4>
+            </div>
+            <ul class="space-y-4" id="quickWinsList"></ul>
+          </div>
+
+          <div class="bg-surface-container rounded-xl p-8 border border-outline-variant/10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-primary">done_all</span>
+              <h4 class="font-headline font-bold">Matched Skills</h4>
+            </div>
+            <div class="flex flex-wrap gap-2" id="matchedSkillsList"></div>
+          </div>
+
+          <div class="bg-surface-container rounded-xl p-8 border border-outline-variant/10">
+            <div class="flex items-center gap-3 mb-6">
+              <span class="material-symbols-outlined text-primary-fixed">tag</span>
+              <h4 class="font-headline font-bold">Keyword Overlap</h4>
+            </div>
+            <div class="flex flex-wrap gap-2" id="keywordOverlapList"></div>
+          </div>
+
+          <div class="md:col-span-2 bg-surface-container-low rounded-xl p-8 border border-outline-variant/10">
+            <div class="flex items-center justify-between mb-8 gap-4 flex-wrap">
+              <h4 class="text-xl font-headline font-bold">Improvement Roadmap</h4>
+              <span class="px-3 py-1 bg-primary/10 text-primary text-[10px] uppercase font-black tracking-widest rounded border border-primary/20" id="roadmapTarget">Target: stronger resume alignment</span>
+            </div>
+            <div class="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-primary/20" id="roadmapList"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="hidden lg:flex fixed left-0 top-0 h-full w-64 flex-col py-8 px-4 bg-[#0e0e0e] border-r border-purple-500/10 z-40 gap-2">
+    <div class="text-purple-500 font-black text-2xl px-3 mb-6">AlignMetric</div>
+    <nav class="flex flex-col gap-2 w-full">
+      <div class="flex items-center gap-4 p-3 rounded-lg bg-purple-500/10 text-purple-400 border-r-4 border-purple-500 cursor-pointer transition-all">
+        <span class="material-symbols-outlined">grid_view</span>
+        <span class="text-xs font-bold uppercase tracking-widest">Core</span>
+      </div>
+      <div class="flex items-center gap-4 p-3 rounded-lg text-gray-500 hover:text-purple-200 hover:bg-purple-900/20 cursor-pointer transition-all duration-300">
+        <span class="material-symbols-outlined">insights</span>
+        <span class="text-xs font-bold uppercase tracking-widest">Metrics</span>
+      </div>
+      <div class="flex items-center gap-4 p-3 rounded-lg text-gray-500 hover:text-purple-200 hover:bg-purple-900/20 cursor-pointer transition-all duration-300">
+        <span class="material-symbols-outlined">hub</span>
+        <span class="text-xs font-bold uppercase tracking-widest">Neural Link</span>
+      </div>
+      <div class="flex items-center gap-4 p-3 rounded-lg text-gray-500 hover:text-purple-200 hover:bg-purple-900/20 cursor-pointer transition-all duration-300">
+        <span class="material-symbols-outlined">terminal</span>
+        <span class="text-xs font-bold uppercase tracking-widest">System</span>
+      </div>
+    </nav>
+    <div class="mt-auto px-2">
+      <div class="bg-surface-container-low p-4 rounded-xl border border-primary/10">
+        <div class="flex items-center gap-3 mb-3">
+          <img alt="System Identity" class="w-10 h-10 rounded-full border border-primary/30" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIvHzI9-Ey0nOWZDp5HMi3nuuaIyRF8P9wm6a2l2hyHNrvVTDJAVjS9afteuaogg-aDrpkONCZ9gD4MoGupKBbGqoD3n1KdpgF48lSH-DNxGBp9VQU8J-1J4bR_r6qVapLmyqu5Qi_dLPVug-AaXH9gdcxvwFBZGr55VInyH-tNACiI50wItBZ-4n23awahlBPQypn5lNArASx0_QEhssMGdzFsR6jk7LlR9p_twNoxHDSiLaq578Y5nQtppf1mQ7wJULXGjuBnBc" />
+          <div>
+            <p class="text-xs font-semibold">Alex Rivera</p>
+            <p class="text-[10px] text-primary/70 uppercase font-bold">AI Engine v4.2</p>
+          </div>
+        </div>
+        <button class="w-full py-2 bg-primary/20 hover:bg-primary/30 text-primary text-[10px] font-black uppercase tracking-widest rounded transition-all" id="syncDataButton">Sync Data</button>
+      </div>
+    </div>
+  </aside>
+
+  <nav class="md:hidden fixed bottom-0 left-0 w-full bg-surface-container flex justify-around items-center py-4 z-50 border-t border-purple-500/20 backdrop-blur-lg">
+    <div class="flex flex-col items-center text-primary">
+      <span class="material-symbols-outlined">grid_view</span>
+      <span class="text-[10px] font-bold mt-1 uppercase">CORE</span>
+    </div>
+    <div class="flex flex-col items-center text-gray-400">
+      <span class="material-symbols-outlined">insights</span>
+      <span class="text-[10px] font-bold mt-1 uppercase">STATS</span>
+    </div>
+    <div class="flex flex-col items-center text-gray-400">
+      <span class="material-symbols-outlined">hub</span>
+      <span class="text-[10px] font-bold mt-1 uppercase">LINK</span>
+    </div>
+    <div class="flex flex-col items-center text-gray-400">
+      <span class="material-symbols-outlined">terminal</span>
+      <span class="text-[10px] font-bold mt-1 uppercase">SYS</span>
+    </div>
+  </nav>
+
+  <script>
+    const API_BASE_URL = (window.ALIGNMETRIC_API_BASE_URL || "http://localhost:8000").replace(/\/$/, "");
+
+    const state = {
+      selectedFile: null,
+      loading: false
+    };
+
+    const elements = {
+      uploadZone: document.getElementById("uploadZone"),
+      resumeInput: document.getElementById("resumeInput"),
+      selectedFileLabel: document.getElementById("selectedFileLabel"),
+      jobDescription: document.getElementById("jobDescription"),
+      analyzeButton: document.getElementById("analyzeButton"),
+      analyzeButtonLabel: document.getElementById("analyzeButtonLabel"),
+      progressTrack: document.getElementById("progressTrack"),
+      progressBar: document.getElementById("progressBar"),
+      processingText: document.getElementById("processingText"),
+      errorMessage: document.getElementById("errorMessage"),
+      statusMessage: document.getElementById("statusMessage"),
+      emptyState: document.getElementById("emptyState"),
+      results: document.getElementById("results"),
+      scoreGauge: document.getElementById("scoreGauge"),
+      scoreValue: document.getElementById("scoreValue"),
+      scoreTitle: document.getElementById("scoreTitle"),
+      summaryText: document.getElementById("summaryText"),
+      fallbackBadge: document.getElementById("fallbackBadge"),
+      missingSkillsList: document.getElementById("missingSkillsList"),
+      quickWinsList: document.getElementById("quickWinsList"),
+      matchedSkillsList: document.getElementById("matchedSkillsList"),
+      keywordOverlapList: document.getElementById("keywordOverlapList"),
+      roadmapList: document.getElementById("roadmapList"),
+      roadmapTarget: document.getElementById("roadmapTarget"),
+      jumpToAnalyzer: document.getElementById("jumpToAnalyzer"),
+      syncDataButton: document.getElementById("syncDataButton")
+    };
+
+    function initialize() {
+      elements.emptyState.classList.remove("hidden");
+
+      elements.uploadZone.addEventListener("click", () => elements.resumeInput.click());
+      elements.resumeInput.addEventListener("change", handleFileChange);
+      elements.analyzeButton.addEventListener("click", analyzeAlignment);
+      elements.jumpToAnalyzer.addEventListener("click", () => {
+        document.getElementById("analyzer").scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      elements.syncDataButton.addEventListener("click", analyzeAlignment);
+
+      ["dragenter", "dragover"].forEach((eventName) => {
+        elements.uploadZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          elements.uploadZone.classList.add("drop-active");
+        });
+      });
+
+      ["dragleave", "drop"].forEach((eventName) => {
+        elements.uploadZone.addEventListener(eventName, (event) => {
+          event.preventDefault();
+          elements.uploadZone.classList.remove("drop-active");
+        });
+      });
+
+      elements.uploadZone.addEventListener("drop", (event) => {
+        const [file] = event.dataTransfer.files;
+        if (file) {
+          setSelectedFile(file);
+        }
+      });
+    }
+
+    function handleFileChange(event) {
+      const [file] = event.target.files;
+      setSelectedFile(file || null);
+    }
+
+    function setSelectedFile(file) {
+      state.selectedFile = file;
+      elements.selectedFileLabel.textContent = file ? `${file.name} selected` : "No file selected";
+      hideMessage(elements.errorMessage);
+    }
+
+    function setLoading(isLoading) {
+      state.loading = isLoading;
+      elements.analyzeButton.disabled = isLoading;
+      elements.analyzeButtonLabel.textContent = isLoading ? "Analyzing..." : "Analyze Alignment";
+      elements.progressTrack.classList.toggle("hidden", !isLoading);
+      elements.processingText.classList.toggle("hidden", !isLoading);
+      if (isLoading) {
+        showMessage(elements.statusMessage, "Sending resume to the AI matching engine...");
+      }
+      elements.progressBar.style.width = isLoading ? "78%" : "0%";
+    }
+
+    function showMessage(element, text) {
+      element.textContent = text;
+      element.classList.remove("hidden");
+    }
+
+    function hideMessage(element) {
+      element.textContent = "";
+      element.classList.add("hidden");
+    }
+
+    function createTag(text, variant) {
+      const tag = document.createElement("span");
+      const styles = {
+        error: "bg-error-container/20 text-error border-error/20",
+        success: "bg-primary/10 text-primary-fixed border-primary/20",
+        neutral: "bg-surface-container-high text-on-surface-variant border-outline-variant/30"
+      };
+      tag.className = `px-3 py-1.5 rounded-full text-xs font-medium border ${styles[variant]}`;
+      tag.textContent = text;
+      return tag;
+    }
+
+    function createListItem(text) {
+      const item = document.createElement("li");
+      item.className = "flex gap-3 text-sm text-on-surface-variant items-start";
+      item.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 shrink-0 shadow-[0_0_5px_#a855f7]"></span><span></span>';
+      item.lastElementChild.textContent = text;
+      return item;
+    }
+
+    function createRoadmapStep(title, body, isActive) {
+      const wrapper = document.createElement("div");
+      wrapper.className = "flex gap-6 relative";
+
+      const indicatorClass = isActive
+        ? "w-6 h-6 rounded-full bg-surface-container-highest border border-primary/40 flex items-center justify-center shrink-0 z-10 shadow-[0_0_10px_rgba(168,85,247,0.2)]"
+        : "w-6 h-6 rounded-full bg-surface-container-highest border border-outline-variant flex items-center justify-center shrink-0 z-10";
+
+      const dotClass = isActive ? "w-2 h-2 rounded-full bg-primary" : "w-2 h-2 rounded-full bg-outline-variant";
+
+      wrapper.innerHTML = `
+        <div class="${indicatorClass}">
+          <div class="${dotClass}"></div>
+        </div>
+        <div>
+          <h5 class="text-on-surface font-semibold text-sm mb-1"></h5>
+          <p class="text-xs text-on-surface-variant leading-relaxed"></p>
+        </div>
+      `;
+
+      wrapper.querySelector("h5").textContent = title;
+      wrapper.querySelector("p").textContent = body;
+      return wrapper;
+    }
+
+    function fillTagList(container, values, variant, fallbackText) {
+      container.innerHTML = "";
+      if (!values.length) {
+        container.appendChild(createTag(fallbackText, "neutral"));
+        return;
+      }
+      values.forEach((value) => container.appendChild(createTag(value, variant)));
+    }
+
+    function fillQuickWins(items) {
+      elements.quickWinsList.innerHTML = "";
+      const values = items.length ? items : ["No resume tweaks suggested yet. Try a more detailed job description for stronger recommendations."];
+      values.forEach((item) => elements.quickWinsList.appendChild(createListItem(item)));
+    }
+
+    function fillRoadmap(missingSkills, improvements) {
+      elements.roadmapList.innerHTML = "";
+      const steps = [];
+
+      if (missingSkills[0]) {
+        steps.push({
+          title: "Close the biggest skill gap",
+          body: `Add proof of ${missingSkills[0]} if you have it, or build a project that demonstrates it.`,
+          active: true
+        });
+      }
+
+      improvements.slice(0, 2).forEach((improvement, index) => {
+        steps.push({
+          title: index === 0 ? "Rewrite your resume bullets" : "Strengthen supporting evidence",
+          body: improvement,
+          active: false
+        });
+      });
+
+      if (!steps.length) {
+        steps.push({
+          title: "Collect more job-specific evidence",
+          body: "Add skills, tools, and impact metrics that directly mirror the target role.",
+          active: true
+        });
+      }
+
+      steps.forEach((step) => elements.roadmapList.appendChild(createRoadmapStep(step.title, step.body, step.active)));
+    }
+
+    function renderResults(payload) {
+      const result = payload.result;
+      const score = Math.max(0, Math.min(100, Number(result.match_score) || 0));
+
+      elements.emptyState.classList.add("hidden");
+      elements.results.classList.remove("hidden");
+      elements.scoreGauge.style.setProperty("--value", String(score));
+      elements.scoreValue.textContent = `${score}%`;
+      elements.scoreTitle.textContent = result.title_match || "Match Result";
+      elements.summaryText.textContent = result.summary || "Analysis completed.";
+      elements.roadmapTarget.textContent = score >= 90 ? "Target reached: excellent fit" : `Target: +${Math.max(5, 95 - score)}% stronger alignment`;
+      elements.fallbackBadge.classList.toggle("hidden", !payload.used_fallback);
+
+      fillTagList(elements.missingSkillsList, result.missing_skills || [], "error", "No major missing skills detected");
+      fillTagList(elements.matchedSkillsList, result.matched_skills || [], "success", "No matched skills extracted");
+      fillTagList(elements.keywordOverlapList, result.keyword_overlap || [], "neutral", "No keyword overlap detected");
+      fillQuickWins(result.suggested_improvements || []);
+      fillRoadmap(result.missing_skills || [], result.suggested_improvements || []);
+
+      elements.results.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    async function analyzeAlignment() {
+      if (state.loading) {
+        return;
+      }
+
+      hideMessage(elements.errorMessage);
+      hideMessage(elements.statusMessage);
+
+      if (!state.selectedFile) {
+        showMessage(elements.errorMessage, "Please upload a resume file first.");
+        return;
+      }
+
+      const jobDescription = elements.jobDescription.value.trim();
+      if (jobDescription.length < 20) {
+        showMessage(elements.errorMessage, "Please paste a fuller job description so the matcher has enough detail.");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("resume", state.selectedFile);
+      formData.append("job_description", jobDescription);
+
+      setLoading(true);
+
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/analyze`, {
+          method: "POST",
+          body: formData
+        });
+
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.detail || "Failed to analyze resume.");
+        }
+
+        renderResults(payload);
+        showMessage(elements.statusMessage, `Analysis complete for ${payload.filename}.`);
+      } catch (error) {
+        hideMessage(elements.statusMessage);
+        showMessage(elements.errorMessage, error.message || "Something went wrong while contacting the backend.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    initialize();
+  </script>
+</body>
+</html>
